@@ -1,0 +1,9 @@
+[package]
+name = "oports"
+version = "0.1.0"
+authors = ["ndelvalle <nicolas.delvalle@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+async-std = "1.4.0"
+futures = "0.3.1"
