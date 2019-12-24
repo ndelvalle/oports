@@ -2,6 +2,8 @@
 name = "oports"
 version = "0.1.0"
 authors = ["ndelvalle <nicolas.delvalle@gmail.com>"]
+description = "Async library to retrieve open ports for a given IP address"
+license = "MIT"
 edition = "2018"
 
 [dependencies]
