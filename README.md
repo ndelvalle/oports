@@ -10,7 +10,7 @@ Add `oports` as a dependency in the cargo.toml file if your project:
 
 ```toml
 [dependencies]
-oports = "0.1"
+oports = "0.2"
 ```
 
 If you have [cargo-edit](https://github.com/killercup/cargo-edit) utility tool
