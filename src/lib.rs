@@ -75,8 +75,6 @@ mod tests {
 
         let open_ports = block_on(super::open_ports(ip_v4_addr));
 
-        println!("aca {:?}", open_ports);
-
         assert!(true);
 
         assert!(open_ports.len() > 0);
