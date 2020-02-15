@@ -1,6 +1,6 @@
 [package]
 name = "oports"
-version = "0.2.1-alpha.0"
+version = "0.2.1"
 authors = ["ndelvalle <nicolas.delvalle@gmail.com>"]
 description = "Async library to retrieve open ports for a given IP address"
 license = "MIT"
