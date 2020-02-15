@@ -1,3 +1,23 @@
+/// A crate to asynchronously retrieve open ports for a given IP address.
+///
+/// This library uses the [futures](https://crates.io/crates/futures) crate to
+/// perform asynchronous tasks.
+/// All methods return a future that can be awaited, if you are not using
+/// futures, you can use the `block_on` executor from the future crate.
+///
+/// ## Examples
+///
+/// Check if a port is open for a given IP address
+///
+/// ```rust ignore
+/// use oports;
+/// use std::net::{IpAddr, Ipv4Addr};
+///
+///
+/// let ip_v4_addr = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
+/// let is_port_4040_open = oports::is_port_open(ip_v4_addr, 4040).await;
+/// ```
+///
 use async_std::net::{IpAddr, TcpStream};
 use futures::future::FutureExt;
 use futures::stream::StreamExt;
@@ -12,13 +32,11 @@ pub async fn open_ports_by_range(ip: IpAddr, from: u16, to: u16) -> Vec<u16> {
 
     let stream = futures::stream::iter(open_ports_futures)
         .buffer_unordered(100)
-        .filter_map(|item| {
-            async move {
-                if item.1 {
-                    Some(item.0)
-                } else {
-                    None
-                }
+        .filter_map(|item| async move {
+            if item.1 {
+                Some(item.0)
+            } else {
+                None
             }
         });
 
@@ -64,7 +82,7 @@ mod tests {
         assert_eq!(open_ports_b[0], 4045);
     }
 
-    // This test is too expensive
+    // This test is too expensive to be runned by the CI.
     #[test]
     #[ignore]
     fn test_open_ports() {
