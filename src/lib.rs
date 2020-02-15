@@ -1,73 +1,102 @@
+/// A crate to asynchronously retrieve open ports for a given IP address.
+///
+/// This library uses the [futures](https://crates.io/crates/futures) crate to
+/// perform asynchronous tasks.
+/// All methods return a future that can be awaited, if you are not using
+/// futures, you can use the `block_on` executor from the future crate.
+///
+/// ## Examples
+///
+/// Check if a port is open for a given IP address
+///
+/// ```rust ignore
+/// use oports;
+/// use std::net::{IpAddr, Ipv4Addr};
+///
+///
+/// let ip_v4_addr = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
+/// let is_port_4040_open = oports::is_port_open(ip_v4_addr, 4040).await;
+/// ```
+///
 use async_std::net::{IpAddr, TcpStream};
+use futures::future::FutureExt;
+use futures::stream::StreamExt;
 
-const MAX_PORT: u16 = 65535;
-
-pub struct Oports {
-    address: IpAddr,
+pub async fn is_port_open(ip: IpAddr, port: u16) -> bool {
+    TcpStream::connect((ip, port)).await.is_ok()
 }
 
-impl Oports {
-    pub fn new(ip: IpAddr) -> Self {
-        Self { address: ip }
-    }
+pub async fn open_ports_by_range(ip: IpAddr, from: u16, to: u16) -> Vec<u16> {
+    let open_ports_futures =
+        (from..to).map(|port| is_port_open(ip, port).map(move |is_open| (port, is_open)));
 
-    pub async fn is_port_open(&self, port: u16) -> bool {
-        TcpStream::connect((self.address, port)).await.is_ok()
-    }
-
-    pub async fn open_ports_by_range(&self, from: u16, to: u16) -> Vec<u16> {
-        let mut open_ports = vec![];
-
-        for port in from..to {
-            let is_open = self.is_port_open(port).await;
-            if is_open {
-                open_ports.push(port)
+    let stream = futures::stream::iter(open_ports_futures)
+        .buffer_unordered(100)
+        .filter_map(|item| async move {
+            if item.1 {
+                Some(item.0)
+            } else {
+                None
             }
-        }
-        open_ports
-    }
+        });
 
-    pub async fn open_ports(&self) -> Vec<u16> {
-        self.open_ports_by_range(0, MAX_PORT).await
-    }
+    stream.collect::<Vec<u16>>().await
+}
+
+pub async fn open_ports(ip: IpAddr) -> Vec<u16> {
+    open_ports_by_range(ip, 0, u16::max_value()).await
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use futures::executor::block_on;
     use std::net::{IpAddr, Ipv4Addr, TcpListener};
 
+    // TODO: It would be nice to shutdown the connection cleanly after the
+    //       assertion was made, but I do not know how to do it.
+
     #[test]
-    fn it_should_determine_if_a_port_is_open() {
-        // TODO: It would be nice to shutdown the connection cleanly after the
-        //       assertion was made.
+    fn test_is_port_open() {
         let _listener = TcpListener::bind("127.0.0.1:4040").unwrap();
 
         let ip_v4_addr = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
-        let op = Oports::new(ip_v4_addr);
 
-        let is_port_8585_open = block_on(op.is_port_open(4040));
-        let is_port_2222_open = block_on(op.is_port_open(4041));
+        let is_port_4040_open = block_on(super::is_port_open(ip_v4_addr, 4040));
+        let is_port_4041_open = block_on(super::is_port_open(ip_v4_addr, 4041));
 
-        assert_eq!(is_port_8585_open, true);
-        assert_eq!(is_port_2222_open, false);
+        assert_eq!(is_port_4040_open, true);
+        assert_eq!(is_port_4041_open, false);
     }
 
     #[test]
-    fn it_should_return_open_ports_by_range() {
-        // TODO: It would be nice to shutdown the connection cleanly after the
-        //       assertion was made.
+    fn test_open_ports_by_range() {
         let _listener = TcpListener::bind("127.0.0.1:4045").unwrap();
 
         let ip_v4_addr = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
-        let op = Oports::new(ip_v4_addr);
 
-        let open_ports_a = block_on(op.open_ports_by_range(0, 10));
-        let open_ports_b = block_on(op.open_ports_by_range(4000, 4100));
+        let open_ports_a = block_on(super::open_ports_by_range(ip_v4_addr, 0, 10));
+        let open_ports_b = block_on(super::open_ports_by_range(ip_v4_addr, 4000, 4100));
 
         assert_eq!(open_ports_a.len(), 0);
         assert_eq!(open_ports_b.len(), 1);
         assert_eq!(open_ports_b[0], 4045);
+    }
+
+    // This test is too expensive to be runned by the CI.
+    #[test]
+    #[ignore]
+    fn test_open_ports() {
+        let _listener1 = TcpListener::bind("127.0.0.1:4050").unwrap();
+        let _listener2 = TcpListener::bind("127.0.0.1:4060").unwrap();
+
+        let ip_v4_addr = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
+
+        let open_ports = block_on(super::open_ports(ip_v4_addr));
+
+        assert!(true);
+
+        assert!(open_ports.len() > 0);
+        assert!(open_ports.contains(&4050));
+        assert!(open_ports.contains(&4060));
     }
 }
