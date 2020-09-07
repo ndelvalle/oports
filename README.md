@@ -7,7 +7,7 @@
 
 <div align="center">
   <!-- Github Actions -->
-  <a href="https://crates.io/crates/sqlx">
+  <a href="https://github.com/ndelvalle/oports/actions?query=workflow%3ARust">
     <img src="https://img.shields.io/github/workflow/status/ndelvalle/oports/Rust?style=flat-square" alt="actions status" />
   </a>
   <!-- Version -->
