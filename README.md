@@ -1,8 +1,24 @@
-# oports
+<h1 align="center">oports</h1>
+<div align="center">
+ <strong>Rust library to asynchronously retrieve open ports for a given IP address</strong>
+</div>
 
-[![](https://github.com/ndelvalle/oports/workflows/Rust/badge.svg)](https://github.com/ndelvalle/oports/actions?query=workflow%3ARust)
+<br />
 
-Rust library to retrieve open ports for a given IP address
+<div align="center">
+  <!-- Github Actions -->
+  <a href="https://crates.io/crates/sqlx">
+    <img src="https://img.shields.io/github/workflow/status/ndelvalle/oports/Rust?style=flat-square" alt="actions status" />
+  </a>
+  <!-- Version -->
+  <a href="https://crates.io/crates/oports">
+    <img src="https://img.shields.io/crates/v/oports.svg?style=flat-square" alt="Crates.io version" />
+  </a>
+  <!-- Docs -->
+  <a href="https://docs.rs/oports">
+    <img src="https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square" alt="docs.rs docs" />
+  </a>
+</div>
 
 
 ## Install
@@ -14,7 +30,8 @@ Add `oports` as a dependency in the cargo.toml file of your project:
 oports = "1.0.0"
 ```
 
-If you have [cargo-edit](https://github.com/killercup/cargo-edit) utility tool installed, use:
+If you have [cargo-edit](https://github.com/killercup/cargo-edit) utility tool
+installed, use:
 
 ```bash
 $ cargo add oports
@@ -36,7 +53,8 @@ let is_open = oports::is_port_open(localhost, 4040).await;
 
 #### get_open_ports(ip: IpAddr, ports: Vec<u16>, concurrency: Option<usize>) -> Vec<u16>
 
-Retrieves a vec with open ports for a given vec of port numbers an IP address. The default concurrency is `100` if the `Option` resolves to a `None` value.
+Retrieves a vec with open ports for a given vec of port numbers an IP addresses.
+The default concurrency is `100` if the `Option` resolves to a `None` value.
 
 ```rust
 use oports;
@@ -50,7 +68,8 @@ let open_ports = oports::get_open_ports(localhost, ports, concurrency).await;
 
 #### get_all_open_ports(ip: IpAddr, concurrency: Option<usize>) -> Vec<u16>
 
-Retrieves a vec with all open ports for a given IP address. The default concurrency is `100` if the `Option` resolves to a `None` value.
+Retrieves a vec with all open ports for a given IP address. The default concurrency
+is `100` if the `Option` resolves to a `None` value.
 
 ```rust
 use oports;
