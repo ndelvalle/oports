@@ -41,7 +41,7 @@ $ cargo add oports
 
 #### is_port_open(ip: IpAddr, port: u16) -> bool
 
-Check if the given port is open for a given IP address.
+Check if the given port is open for a specified IP address.
 
 ```rust
 use oports;
